@@ -41,8 +41,18 @@ export default function Home() {
   const selProds = useMemo(() => selProd ? [selProd] : [], [selProd]);
   const rd = useMemo(() => {
     if (!data || !selRegion || !selProds.length) return null;
+    if (selRegion === '__ALL__') return null; // HO view handled separately
     return computeSummary(data.tree, selRegion, selProds);
   }, [data, selRegion, selProds]);
+
+  // HO bird-eye view: one row per region
+  const hoView = useMemo(() => {
+    if (!data || !selProds.length || selRegion !== '__ALL__') return null;
+    return data.regions.map(r => {
+      const s = computeSummary(data.tree, r, selProds);
+      return { region: r, totOp: s.totOp, totUt: s.totUt, numSOs: s.numSOs };
+    });
+  }, [data, selProds, selRegion]);
 
   const emailHtml = useMemo(() => {
     if (!rd || !selProds.length) return '';
@@ -106,16 +116,16 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>RSM Execution Report Tool</title>
-        <meta name="description" content="NUVENTA Division — Input execution report generator for RSMs" />
+        <title>Execution Report Tool</title>
+        <meta name="description" content="Input execution report generator" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>RSM Execution Report Tool</h1>
-          <p className={styles.subtitle}>NUVENTA Division · Upload CSV → Select Input → Pick Region → Copy Email</p>
+          <h1 className={styles.title}>Execution Report Tool</h1>
+          <p className={styles.subtitle}>Upload CSV → Select Input → Pick Region → Copy Email</p>
         </div>
 
         {/* Steps indicator */}
@@ -171,11 +181,66 @@ export default function Home() {
                   onChange={e => { setSelRegion(e.target.value); setShowEmail(false); setCopyMsg(''); }}
                   className={styles.select}
                 >
+                  <option value="__ALL__">🌐 All Regions — HO Bird Eye View</option>
                   {data.regions.map(r => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
               </div>
+            )}
+
+            {/* HO Bird Eye View */}
+            {hoView && (
+              <>
+                <div className={styles.legend}>
+                  <span style={{ color: 'var(--green)' }}>🟢 Strong ≥60%</span>
+                  <span style={{ color: 'var(--amber)' }}>🟡 Moderate 30–59%</span>
+                  <span style={{ color: 'var(--red)' }}>🔴 Low &lt;30%</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text2)' }}>Input: {selProd}</span>
+                </div>
+                <div className={styles.tableWrap}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left' }}>Region</th>
+                        <th>SOs</th>
+                        <th>Opening</th>
+                        <th>Utilised</th>
+                        <th>Closing</th>
+                        <th>Exec %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const totOp = hoView.reduce((a,r)=>a+r.totOp,0);
+                        const totUt = hoView.reduce((a,r)=>a+r.totUt,0);
+                        const totSOs = hoView.reduce((a,r)=>a+r.numSOs,0);
+                        const allPct = calcPct(totUt,totOp);
+                        return <>
+                          <tr style={{ background: '#EBF3FF', fontWeight: 700 }}>
+                            <td style={{ fontWeight: 700 }}>ALL REGIONS — Total</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700 }}>{totSOs}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700 }}>{totOp}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700 }}>{totUt}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700 }}>{totOp - totUt}</td>
+                            <td style={{ textAlign: 'center' }}><Pill ut={totUt} op={totOp} /><Bar ut={totUt} op={totOp} /></td>
+                          </tr>
+                          {[...hoView].sort((a,b)=>(calcPct(b.totUt,b.totOp)||0)-(calcPct(a.totUt,a.totOp)||0)).map((r,i) => (
+                            <tr key={i}>
+                              <td style={{ fontWeight: 500 }}>{r.region}</td>
+                              <td style={{ textAlign: 'center' }}>{r.numSOs}</td>
+                              <td style={{ textAlign: 'center' }}>{r.totOp}</td>
+                              <td style={{ textAlign: 'center' }}>{r.totUt}</td>
+                              <td style={{ textAlign: 'center' }}>{r.totOp - r.totUt}</td>
+                              <td style={{ textAlign: 'center' }}><Pill ut={r.totUt} op={r.totOp} /><Bar ut={r.totUt} op={r.totOp} /></td>
+                            </tr>
+                          ))}
+                        </>;
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
             {/* ④ Execution table */}
