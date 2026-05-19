@@ -1,0 +1,73 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg2: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --text2: #666666;
+  --blue: #1a4fa0;
+  --blue-lt: #e6f1fb;
+  --green: #2e7d0e;
+  --green-lt: #e8f5da;
+  --amber: #8a5000;
+  --amber-lt: #fff3e0;
+  --red: #b02020;
+  --red-lt: #fdecea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --bg2: #242424;
+    --border: #3a3a3a;
+    --text: #f0f0f0;
+    --text2: #999999;
+    --blue-lt: #162840;
+    --green-lt: #1a2e10;
+    --amber-lt: #2a1f00;
+    --red-lt: #2e1010;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+select, button, input[type="file"] {
+  font-family: inherit;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+}
+
+table { border-collapse: collapse; width: 100%; }
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 7px 11px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+th {
+  background: var(--bg2);
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
