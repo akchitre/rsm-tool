@@ -106,7 +106,7 @@ export function buildHtmlEmail(region, selProds, rd) {
 
   h += `</ul>`;
   h += `<p style="font-size:12px;">Kindly ensure corrective action on lagging territories before month-end.</p>`;
-  h += `<p style="font-size:12px;margin-top:10px;">Regards,;
+  h += `<p style="font-size:12px;margin-top:10px;">Regards,<br><b>Marketing Head – NUVENTA Division</b></p>`;
   h += `</div>`;
   return h;
 }
